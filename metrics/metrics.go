@@ -1,6 +1,7 @@
 // Package metrics provides an extensible framework to instrument your
-// application. Considerable design influence has been taken from
-// https://github.com/codahale/metrics and https://prometheus.io.
+// application. All metrics are safe for concurrent use. Considerable design
+// influence has been taken from https://github.com/codahale/metrics and
+// https://prometheus.io.
 package metrics
 
 import "fmt"
