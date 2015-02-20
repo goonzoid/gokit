@@ -4,8 +4,6 @@
 // https://prometheus.io.
 package metrics
 
-import "fmt"
-
 // Counter is a monotonically-increasing, unsigned, 64-bit integer used to
 // capture the number of times an event has occurred. By tracking the deltas
 // between measurements of a counter over intervals of time, an aggregation
@@ -34,5 +32,5 @@ type Histogram interface {
 // metric. Fields may be ignored by implementations.
 type Field struct {
 	Key   string
-	Value fmt.Stringer
+	Value string
 }
