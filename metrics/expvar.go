@@ -87,7 +87,7 @@ func (h *expvarHistogram) Observe(value int64) {
 }
 
 func (h *expvarHistogram) rotateLoop(d time.Duration) {
-	for range time.Tick(d) {
+	for _ = range time.Tick(d) {
 		h.mu.Lock()
 		h.hist.Rotate()
 		h.mu.Unlock()
