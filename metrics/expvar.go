@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"expvar"
+	"fmt"
 	"sync"
 	"time"
 
@@ -41,32 +42,32 @@ func (g *expvarGauge) Set(value int64) { g.v.Set(value) }
 // NewExpvarHistogram is taken from http://github.com/codahale/metrics. It
 // returns a windowed HDR histogram which drops data older than five minutes.
 //
-// The histogram exposes metrics for 50th, 90th, 95th, and 99th quantiles as
-// gauges. The names are assigned by using the passed name as a prefix and
-// appending e.g. "_p50".
-func NewExpvarHistogram(name string, minValue, maxValue int64, sigfigs int) Histogram {
+// The histogram exposes metrics for each passed quantile as gauges. Quantiles
+// should be integers in the range 1..99. The gauge names are assigned by
+// using the passed name as a prefix and appending "_pNN" e.g. "_p50".
+func NewExpvarHistogram(name string, minValue, maxValue int64, sigfigs int, quantiles ...int) Histogram {
+	gauges := map[int]Gauge{}
+	for _, quantile := range quantiles {
+		if quantile <= 0 || quantile >= 100 {
+			panic(fmt.Sprintf("invalid quantile %d", quantile))
+		}
+		gauges[quantile] = NewExpvarGauge(fmt.Sprintf("%s_p%02d", name, quantile))
+	}
 	h := &expvarHistogram{
-		name: name,
-		hist: hdrhistogram.NewWindowed(5, minValue, maxValue, sigfigs),
-		p50:  NewExpvarGauge(name + "_p50"),
-		p90:  NewExpvarGauge(name + "_p90"),
-		p95:  NewExpvarGauge(name + "_p95"),
-		p99:  NewExpvarGauge(name + "_p99"),
+		hist:   hdrhistogram.NewWindowed(5, minValue, maxValue, sigfigs),
+		name:   name,
+		gauges: gauges,
 	}
 	go h.rotateLoop(1 * time.Minute)
 	return h
 }
 
 type expvarHistogram struct {
-	name string
-
 	mu   sync.Mutex
 	hist *hdrhistogram.WindowedHistogram
 
-	p50 Gauge
-	p90 Gauge
-	p95 Gauge
-	p99 Gauge
+	name   string
+	gauges map[int]Gauge
 }
 
 func (h *expvarHistogram) With(...Field) Histogram { return h }
@@ -80,10 +81,9 @@ func (h *expvarHistogram) Observe(value int64) {
 		panic(err.Error())
 	}
 
-	h.p50.Set(h.hist.Current.ValueAtQuantile(50))
-	h.p90.Set(h.hist.Current.ValueAtQuantile(90))
-	h.p95.Set(h.hist.Current.ValueAtQuantile(95))
-	h.p99.Set(h.hist.Current.ValueAtQuantile(99))
+	for q, gauge := range h.gauges {
+		gauge.Set(h.hist.Current.ValueAtQuantile(float64(q)))
+	}
 }
 
 func (h *expvarHistogram) rotateLoop(d time.Duration) {

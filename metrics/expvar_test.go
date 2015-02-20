@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"expvar"
+	"fmt"
 	"math"
 	"math/rand"
 	"strconv"
@@ -9,7 +10,8 @@ import (
 )
 
 func TestHistogram(t *testing.T) {
-	h := NewExpvarHistogram("test_histogram", 0, 100, 3)
+	quantiles := []int{50, 90, 95, 99}
+	h := NewExpvarHistogram("test_histogram", 0, 100, 3, quantiles...)
 
 	rand.Seed(42)
 	const mean, stdev int64 = 50, 10
@@ -19,21 +21,15 @@ func TestHistogram(t *testing.T) {
 	}
 
 	var tolerance int64 = 2
-	for quantile, want := range map[string]int64{
-		"_p50": normalValueAtQuantile(mean, stdev, 50),
-		"_p90": normalValueAtQuantile(mean, stdev, 90),
-		"_p95": normalValueAtQuantile(mean, stdev, 95),
-		"_p99": normalValueAtQuantile(mean, stdev, 99),
-	} {
-		s := expvar.Get("test_histogram" + quantile).String()
-
+	for _, quantile := range quantiles {
+		want := normalValueAtQuantile(mean, stdev, quantile)
+		s := expvar.Get(fmt.Sprintf("test_histogram_p%02d", quantile)).String()
 		have, err := strconv.Atoi(s)
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if int64(math.Abs(float64(want)-float64(have))) > tolerance {
-			t.Errorf("%s: want %d, have %d", quantile, want, have)
+			t.Errorf("quantile %d: want %d, have %d", quantile, want, have)
 		}
 	}
 }
