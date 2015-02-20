@@ -1,4 +1,4 @@
-package metrics
+package metrics_test
 
 import (
 	"expvar"
@@ -7,11 +7,13 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/peterbourgon/gokit/metrics"
 )
 
 func TestHistogram(t *testing.T) {
 	quantiles := []int{50, 90, 95, 99}
-	h := NewExpvarHistogram("test_histogram", 0, 100, 3, quantiles...)
+	h := metrics.NewExpvarHistogram("test_histogram", 0, 100, 3, quantiles...)
 
 	rand.Seed(42)
 	const mean, stdev int64 = 50, 10
