@@ -89,7 +89,7 @@ func TestPrometheusHistogram(t *testing.T) {
 		want := normalValueAtQuantile(mean, stdev, quantileInt)
 		have := getPrometheusQuantile(t, scrape, quantileStr)
 		if int(math.Abs(float64(want)-float64(have))) > tolerance {
-			t.Logf("%q: want %d, have %d", quantileStr, want, have)
+			t.Errorf("%q: want %d, have %d", quantileStr, want, have)
 		}
 	}
 }
