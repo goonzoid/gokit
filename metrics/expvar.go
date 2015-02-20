@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codahale/hdrhistogram"
+	"github.com/peterbourgon/gokit/Godeps/_workspace/src/github.com/codahale/hdrhistogram"
 )
 
 type expvarCounter struct {
