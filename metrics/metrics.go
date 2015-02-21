@@ -9,14 +9,14 @@ package metrics
 // between measurements of a counter over intervals of time, an aggregation
 // layer can derive rates, acceleration, etc.
 type Counter interface {
-	With(...Field) Counter
+	With(Field) Counter
 	Add(delta uint64)
 }
 
 // Gauge captures instantaneous measurements of something using signed, 64-bit
 // integers. The value does not need to be monotonic.
 type Gauge interface {
-	With(...Field) Gauge
+	With(Field) Gauge
 	Set(value int64)
 	Add(delta int64)
 }
@@ -25,6 +25,7 @@ type Gauge interface {
 // milliseconds it takes to handle requests). Implementations may choose to
 // add gauges for values at meaningful quantiles.
 type Histogram interface {
+	With(Field) Histogram
 	Observe(value int64)
 }
 

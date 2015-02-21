@@ -19,7 +19,7 @@ func NewExpvarCounter(name string) Counter {
 	return &expvarCounter{expvar.NewInt(name)}
 }
 
-func (c *expvarCounter) With(...Field) Counter { return c }
+func (c *expvarCounter) With(Field) Counter { return c }
 
 func (c *expvarCounter) Add(delta uint64) { c.v.Add(int64(delta)) }
 
@@ -33,7 +33,7 @@ func NewExpvarGauge(name string) Gauge {
 	return &expvarGauge{expvar.NewInt(name)}
 }
 
-func (g *expvarGauge) With(...Field) Gauge { return g }
+func (g *expvarGauge) With(Field) Gauge { return g }
 
 func (g *expvarGauge) Add(delta int64) { g.v.Add(delta) }
 
@@ -70,7 +70,7 @@ type expvarHistogram struct {
 	gauges map[int]Gauge
 }
 
-func (h *expvarHistogram) With(...Field) Histogram { return h }
+func (h *expvarHistogram) With(Field) Histogram { return h }
 
 func (h *expvarHistogram) Observe(value int64) {
 	h.mu.Lock()

@@ -3,7 +3,6 @@ package metrics_test
 import (
 	"io/ioutil"
 	"math"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -76,18 +75,17 @@ func TestPrometheusGauge(t *testing.T) {
 func TestPrometheusHistogram(t *testing.T) {
 	h := metrics.NewPrometheusHistogram("test_histogram", "Qwerty asdf.", []string{})
 
-	rand.Seed(34)
 	const mean, stdev int64 = 50, 10
-	for i := 0; i < 1234; i++ {
-		sample := int64(rand.NormFloat64()*float64(stdev) + float64(mean))
-		h.Observe(sample)
-	}
+	populateNormalHistogram(t, h, 34, mean, stdev)
+	assertPrometheusNormalHistogram(t, "test_histogram", mean, stdev)
+}
 
+func assertPrometheusNormalHistogram(t *testing.T, metricName string, mean, stdev int64) {
 	scrape := scrapePrometheus(t)
-	const tolerance int = 2
+	const tolerance int = 5 // Prometheus approximates higher quantiles badly -_-;
 	for quantileInt, quantileStr := range map[int]string{50: "0.5", 90: "0.9", 99: "0.99"} {
 		want := normalValueAtQuantile(mean, stdev, quantileInt)
-		have := getPrometheusQuantile(t, scrape, quantileStr)
+		have := getPrometheusQuantile(t, scrape, metricName, quantileStr)
 		if int(math.Abs(float64(want)-float64(have))) > tolerance {
 			t.Errorf("%q: want %d, have %d", quantileStr, want, have)
 		}
@@ -112,13 +110,13 @@ func scrapePrometheus(t *testing.T) string {
 	return strings.TrimSpace(string(buf))
 }
 
-func getPrometheusQuantile(t *testing.T, scrape, quantileStr string) int {
-	matches := regexp.MustCompile(`test_histogram{quantile="`+quantileStr+`"} ([0-9]+)`).FindAllStringSubmatch(scrape, -1)
+func getPrometheusQuantile(t *testing.T, scrape, name, quantileStr string) int {
+	matches := regexp.MustCompile(name+`{quantile="`+quantileStr+`"} ([0-9]+)`).FindAllStringSubmatch(scrape, -1)
 	if len(matches) < 1 {
-		t.Fatalf("quantile %q not found in scrape", quantileStr)
+		t.Fatalf("%q: quantile %q not found in scrape", name, quantileStr)
 	}
 	if len(matches[0]) < 2 {
-		t.Fatalf("quantile %q not found in scrape", quantileStr)
+		t.Fatalf("%q: quantile %q not found in scrape", name, quantileStr)
 	}
 	i, err := strconv.Atoi(matches[0][1])
 	if err != nil {

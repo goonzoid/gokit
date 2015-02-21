@@ -4,7 +4,6 @@ import (
 	"expvar"
 	"fmt"
 	"math"
-	"math/rand"
 	"strconv"
 	"testing"
 
@@ -12,20 +11,20 @@ import (
 )
 
 func TestExpvarHistogramQuantiles(t *testing.T) {
+	metricName := "test_histogram"
 	quantiles := []int{50, 90, 95, 99}
-	h := metrics.NewExpvarHistogram("test_histogram", 0, 100, 3, quantiles...)
+	h := metrics.NewExpvarHistogram(metricName, 0, 100, 3, quantiles...)
 
-	rand.Seed(42)
-	const mean, stdev int64 = 50, 10
-	for i := 0; i < 1234; i++ {
-		sample := int64(rand.NormFloat64()*float64(stdev) + float64(mean))
-		h.Observe(sample)
-	}
+	const seed, mean, stdev int64 = 424242, 50, 10
+	populateNormalHistogram(t, h, seed, mean, stdev)
+	assertExpvarNormalHistogram(t, metricName, mean, stdev, quantiles)
+}
 
-	var tolerance int = 2
+func assertExpvarNormalHistogram(t *testing.T, metricName string, mean, stdev int64, quantiles []int) {
+	const tolerance int = 2
 	for _, quantile := range quantiles {
 		want := normalValueAtQuantile(mean, stdev, quantile)
-		s := expvar.Get(fmt.Sprintf("test_histogram_p%02d", quantile)).String()
+		s := expvar.Get(fmt.Sprintf("%s_p%02d", metricName, quantile)).String()
 		have, err := strconv.Atoi(s)
 		if err != nil {
 			t.Fatal(err)

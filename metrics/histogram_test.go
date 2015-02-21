@@ -1,6 +1,20 @@
 package metrics_test
 
-import "math"
+import (
+	"math"
+	"math/rand"
+	"testing"
+
+	"github.com/peterbourgon/gokit/metrics"
+)
+
+func populateNormalHistogram(t *testing.T, h metrics.Histogram, seed int64, mean, stdev int64) {
+	rand.Seed(seed)
+	for i := 0; i < 1234; i++ {
+		sample := int64(rand.NormFloat64()*float64(stdev) + float64(mean))
+		h.Observe(sample)
+	}
+}
 
 // https://en.wikipedia.org/wiki/Normal_distribution#Quantile_function
 func normalValueAtQuantile(mean, stdev int64, quantile int) int64 {

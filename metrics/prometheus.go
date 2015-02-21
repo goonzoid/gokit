@@ -48,10 +48,10 @@ func NewPrometheusCounterWithLabels(name, help string, fieldKeys []string, const
 	}
 }
 
-func (c prometheusCounter) With(fields ...Field) Counter {
+func (c prometheusCounter) With(f Field) Counter {
 	return prometheusCounter{
 		CounterVec: c.CounterVec,
-		Pairs:      merge(c.Pairs, fields),
+		Pairs:      merge(c.Pairs, f),
 	}
 }
 
@@ -89,10 +89,10 @@ func NewPrometheusGaugeWithLabels(name, help string, fieldKeys []string, constLa
 	}
 }
 
-func (g prometheusGauge) With(fields ...Field) Gauge {
+func (g prometheusGauge) With(f Field) Gauge {
 	return prometheusGauge{
 		GaugeVec: g.GaugeVec,
-		Pairs:    merge(g.Pairs, fields),
+		Pairs:    merge(g.Pairs, f),
 	}
 }
 
@@ -136,10 +136,10 @@ func NewPrometheusHistogramWithLabels(name, help string, fieldKeys []string, con
 	}
 }
 
-func (h prometheusHistogram) With(fields ...Field) Histogram {
+func (h prometheusHistogram) With(f Field) Histogram {
 	return prometheusHistogram{
 		SummaryVec: h.SummaryVec,
-		Pairs:      merge(h.Pairs, fields),
+		Pairs:      merge(h.Pairs, f),
 	}
 }
 
@@ -155,18 +155,16 @@ func pairsFrom(fieldKeys []string) map[string]string {
 	return p
 }
 
-func merge(orig map[string]string, fields []Field) map[string]string {
-	newPairs := map[string]string{}
+func merge(orig map[string]string, f Field) map[string]string {
+	if _, ok := orig[f.Key]; !ok {
+		return orig
+	}
+
+	newPairs := make(map[string]string, len(orig))
 	for k, v := range orig {
 		newPairs[k] = v
 	}
 
-	for _, f := range fields {
-		if _, ok := newPairs[f.Key]; !ok {
-			continue
-		}
-		newPairs[f.Key] = f.Value
-	}
-
+	newPairs[f.Key] = f.Value
 	return newPairs
 }
