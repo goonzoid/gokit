@@ -8,6 +8,26 @@ import (
 	"github.com/peterbourgon/gokit/metrics"
 )
 
+func TestMultiWith(t *testing.T) {
+	c := metrics.NewMultiCounter(
+		metrics.NewExpvarCounter("foo"),
+		metrics.NewPrometheusCounter("bar", "Bar counter.", []string{"a"}),
+	)
+
+	c.Add(1)
+	c.With(metrics.Field{Key: "a", Value: "1"}).Add(2)
+	c.Add(3)
+
+	if want, have := strings.Join([]string{
+		`# HELP bar Bar counter.`,
+		`# TYPE bar counter`,
+		`bar{a="1"} 2`,
+		`bar{a="unknown"} 4`,
+	}, "\n"), scrapePrometheus(t); !strings.Contains(have, want) {
+		t.Errorf("Prometheus metric stanza not found or incorrect\n%s", have)
+	}
+}
+
 func TestMultiCounter(t *testing.T) {
 	metrics.NewMultiCounter(
 		metrics.NewExpvarCounter("alpha"),
