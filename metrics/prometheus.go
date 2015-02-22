@@ -3,7 +3,7 @@ package metrics
 import (
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/peterbourgon/gokit/Godeps/_workspace/src/github.com/prometheus/client_golang/prometheus"
 )
 
 // Prometheus has strong opinions about the dimensionality of fields. Users

@@ -8,6 +8,44 @@
 		{
 			"ImportPath": "github.com/codahale/hdrhistogram",
 			"Rev": "9208b142303c12d8899bae836fd524ac9338b4fd"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "c22ae3cf020a21ebb7ae566dccbe90fc8ea4f9ea"
+		},
+		{
+			"ImportPath": "github.com/matttproud/golang_protobuf_extensions/ext",
+			"Rev": "ba7d65ac66e9da93a714ca18f6d1bc7a0c09100c"
+		},
+		{
+			"ImportPath": "github.com/prometheus/client_golang/_vendor/goautoneg",
+			"Comment": "0.1.0-36-g69c8dc8",
+			"Rev": "69c8dc87e94d1bfd25081060a877bcbb5e1f02be"
+		},
+		{
+			"ImportPath": "github.com/prometheus/client_golang/_vendor/perks/quantile",
+			"Comment": "0.1.0-36-g69c8dc8",
+			"Rev": "69c8dc87e94d1bfd25081060a877bcbb5e1f02be"
+		},
+		{
+			"ImportPath": "github.com/prometheus/client_golang/model",
+			"Comment": "0.1.0-36-g69c8dc8",
+			"Rev": "69c8dc87e94d1bfd25081060a877bcbb5e1f02be"
+		},
+		{
+			"ImportPath": "github.com/prometheus/client_golang/prometheus",
+			"Comment": "0.1.0-36-g69c8dc8",
+			"Rev": "69c8dc87e94d1bfd25081060a877bcbb5e1f02be"
+		},
+		{
+			"ImportPath": "github.com/prometheus/client_golang/text",
+			"Comment": "0.1.0-36-g69c8dc8",
+			"Rev": "69c8dc87e94d1bfd25081060a877bcbb5e1f02be"
+		},
+		{
+			"ImportPath": "github.com/prometheus/client_model/go",
+			"Comment": "model-0.0.2-12-gfa8ad6f",
+			"Rev": "fa8ad6fec33561be4280a8f0514318c79d7f6cb6"
 		}
 	]
 }

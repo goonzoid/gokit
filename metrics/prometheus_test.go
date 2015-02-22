@@ -10,8 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/prometheus/client_golang/prometheus"
-
+	"github.com/peterbourgon/gokit/Godeps/_workspace/src/github.com/prometheus/client_golang/prometheus"
 	"github.com/peterbourgon/gokit/metrics"
 )
 
