@@ -19,6 +19,8 @@ type statsdCounter chan uint64
 // protocol to the passed writer. Observations are buffered for the reporting
 // interval or until the buffer exceeds a max packet size, whichever comes
 // first. Fields are ignored.
+//
+// TODO: support for sampling.
 func NewStatsdCounter(w io.Writer, key string, interval time.Duration) Counter {
 	c := make(chan uint64)
 	go fwd(w, key, interval, mapCounter(c))
@@ -48,6 +50,8 @@ type statsdGauge struct {
 // the passed writer. Values are buffered for the reporting interval or until
 // the buffer exceeds a max packet size, whichever comes first. Fields are
 // ignored.
+//
+// TODO: support for sampling.
 func NewStatsdGauge(w io.Writer, key string, interval time.Duration) Gauge {
 	g := &statsdGauge{
 		add: make(chan int64),
@@ -86,6 +90,19 @@ type statsdHistogram chan int64
 // statsd protocol to the passed writer. Observations are buffered for the
 // reporting interval or until the buffer exceeds a max packet size, whichever
 // comes first. Fields are ignored.
+//
+// NewStatsdHistogram is mapped to a statsd Timing, so observations should
+// represent milliseconds. If you observe in units of nanoseconds, you can
+// make the translation with a ScaledHistogram:
+//
+//    NewScaledHistogram(statsdHistogram, time.Millisecond)
+//
+// You can also enforce the constraint in a typesafe way with a millisecond
+// TimeHistogram:
+//
+//    NewTimeHistogram(statsdHistogram, time.Millisecond)
+//
+// TODO: support for sampling.
 func NewStatsdHistogram(w io.Writer, key string, interval time.Duration) Histogram {
 	c := make(chan int64)
 	go fwd(w, key, interval, mapHistogram(c))
@@ -100,7 +117,7 @@ func mapHistogram(in chan int64) chan string {
 	out := make(chan string)
 	go func() {
 		for observation := range in {
-			out <- fmt.Sprintf(":%d|TODO", observation)
+			out <- fmt.Sprintf(":%d|ms", observation)
 		}
 	}()
 	return out
