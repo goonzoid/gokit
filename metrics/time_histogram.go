@@ -2,7 +2,7 @@ package metrics
 
 import "time"
 
-// TimeHistogram is a convenience interface for a Histogram of time.Durations.
+// TimeHistogram is a convenience wrapper for a Histogram of time.Durations.
 type TimeHistogram interface {
 	With(Field) TimeHistogram
 	Observe(time.Duration)
