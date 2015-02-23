@@ -20,15 +20,17 @@ type prometheusCounter struct {
 
 // NewPrometheusCounter returns a new Counter backed by a Prometheus metric.
 // The counter is automatically registered via prometheus.Register.
-func NewPrometheusCounter(name, help string, fieldKeys []string) Counter {
-	return NewPrometheusCounterWithLabels(name, help, fieldKeys, prometheus.Labels{})
+func NewPrometheusCounter(namespace, subsystem, name, help string, fieldKeys []string) Counter {
+	return NewPrometheusCounterWithLabels(namespace, subsystem, name, help, fieldKeys, prometheus.Labels{})
 }
 
 // NewPrometheusCounterWithLabels is the same as NewPrometheusCounter, but
 // attaches a set of const label pairs to the metric.
-func NewPrometheusCounterWithLabels(name, help string, fieldKeys []string, constLabels prometheus.Labels) Counter {
+func NewPrometheusCounterWithLabels(namespace, subsystem, name, help string, fieldKeys []string, constLabels prometheus.Labels) Counter {
 	m := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
+			Namespace:   namespace,
+			Subsystem:   subsystem,
 			Name:        name,
 			Help:        help,
 			ConstLabels: constLabels,
@@ -66,15 +68,17 @@ type prometheusGauge struct {
 
 // NewPrometheusGauge returns a new Gauge backed by a Prometheus metric.
 // The gauge is automatically registered via prometheus.Register.
-func NewPrometheusGauge(name, help string, fieldKeys []string) Gauge {
-	return NewPrometheusGaugeWithLabels(name, help, fieldKeys, prometheus.Labels{})
+func NewPrometheusGauge(namespace, subsystem, name, help string, fieldKeys []string) Gauge {
+	return NewPrometheusGaugeWithLabels(namespace, subsystem, name, help, fieldKeys, prometheus.Labels{})
 }
 
 // NewPrometheusGaugeWithLabels is the same as NewPrometheusGauge, but
 // attaches a set of const label pairs to the metric.
-func NewPrometheusGaugeWithLabels(name, help string, fieldKeys []string, constLabels prometheus.Labels) Gauge {
+func NewPrometheusGaugeWithLabels(namespace, subsystem, name, help string, fieldKeys []string, constLabels prometheus.Labels) Gauge {
 	m := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
+			Namespace:   namespace,
+			Subsystem:   subsystem,
 			Name:        name,
 			Help:        help,
 			ConstLabels: constLabels,
@@ -112,15 +116,17 @@ type prometheusHistogram struct {
 // NewPrometheusHistogram returns a new Histogram backed by a Prometheus
 // summary. It uses a 10-second max age for bucketing. The histogram is
 // automatically registered via prometheus.Register.
-func NewPrometheusHistogram(name, help string, fieldKeys []string) Histogram {
-	return NewPrometheusHistogramWithLabels(name, help, fieldKeys, prometheus.Labels{})
+func NewPrometheusHistogram(namespace, subsystem, name, help string, fieldKeys []string) Histogram {
+	return NewPrometheusHistogramWithLabels(namespace, subsystem, name, help, fieldKeys, prometheus.Labels{})
 }
 
 // NewPrometheusHistogramWithLabels is the same as NewPrometheusHistogram, but
 // attaches a set of const label pairs to the metric.
-func NewPrometheusHistogramWithLabels(name, help string, fieldKeys []string, constLabels prometheus.Labels) Histogram {
+func NewPrometheusHistogramWithLabels(namespace, subsystem, name, help string, fieldKeys []string, constLabels prometheus.Labels) Histogram {
 	m := prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
+			Namespace:   namespace,
+			Subsystem:   subsystem,
 			Name:        name,
 			Help:        help,
 			ConstLabels: constLabels,

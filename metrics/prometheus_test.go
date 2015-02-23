@@ -15,68 +15,68 @@ import (
 )
 
 func TestPrometheusLabelBehavior(t *testing.T) {
-	c := metrics.NewPrometheusCounter("test_prometheus_label_behavior", "Abc def ghi.", []string{"used_key", "unused_key"})
+	c := metrics.NewPrometheusCounter("test", "prometheus_label_behavior", "foobar", "Abc def.", []string{"used_key", "unused_key"})
 	c.With(metrics.Field{Key: "used_key", Value: "declared"}).Add(1)
 	c.Add(1)
 
 	if want, have := strings.Join([]string{
-		`# HELP test_prometheus_label_behavior Abc def ghi.`,
-		`# TYPE test_prometheus_label_behavior counter`,
-		`test_prometheus_label_behavior{unused_key="unknown",used_key="declared"} 1`,
-		`test_prometheus_label_behavior{unused_key="unknown",used_key="unknown"} 1`,
+		`# HELP test_prometheus_label_behavior_foobar Abc def.`,
+		`# TYPE test_prometheus_label_behavior_foobar counter`,
+		`test_prometheus_label_behavior_foobar{unused_key="unknown",used_key="declared"} 1`,
+		`test_prometheus_label_behavior_foobar{unused_key="unknown",used_key="unknown"} 1`,
 	}, "\n"), scrapePrometheus(t); !strings.Contains(have, want) {
 		t.Errorf("metric stanza not found or incorrect\n%s", have)
 	}
 }
 
 func TestPrometheusCounter(t *testing.T) {
-	c := metrics.NewPrometheusCounter("test_prometheus_counter", "Lorem ipsum.", []string{})
+	c := metrics.NewPrometheusCounter("test", "prometheus_counter", "foobar", "Lorem ipsum.", []string{})
 	c.Add(1)
 	c.Add(2)
 	if want, have := strings.Join([]string{
-		`# HELP test_prometheus_counter Lorem ipsum.`,
-		`# TYPE test_prometheus_counter counter`,
-		`test_prometheus_counter 3`,
+		`# HELP test_prometheus_counter_foobar Lorem ipsum.`,
+		`# TYPE test_prometheus_counter_foobar counter`,
+		`test_prometheus_counter_foobar 3`,
 	}, "\n"), scrapePrometheus(t); !strings.Contains(have, want) {
 		t.Errorf("metric stanza not found or incorrect\n%s", have)
 	}
 	c.Add(3)
 	c.Add(4)
 	if want, have := strings.Join([]string{
-		`# HELP test_prometheus_counter Lorem ipsum.`,
-		`# TYPE test_prometheus_counter counter`,
-		`test_prometheus_counter 10`,
+		`# HELP test_prometheus_counter_foobar Lorem ipsum.`,
+		`# TYPE test_prometheus_counter_foobar counter`,
+		`test_prometheus_counter_foobar 10`,
 	}, "\n"), scrapePrometheus(t); !strings.Contains(have, want) {
 		t.Errorf("metric stanza not found or incorrect\n%s", have)
 	}
 }
 
 func TestPrometheusGauge(t *testing.T) {
-	c := metrics.NewPrometheusGauge("test_gauge", "Dolor sit.", []string{})
+	c := metrics.NewPrometheusGauge("test", "prometheus_gauge", "foobar", "Dolor sit.", []string{})
 	c.Set(42)
 	if want, have := strings.Join([]string{
-		`# HELP test_gauge Dolor sit.`,
-		`# TYPE test_gauge gauge`,
-		`test_gauge 42`,
+		`# HELP test_prometheus_gauge_foobar Dolor sit.`,
+		`# TYPE test_prometheus_gauge_foobar gauge`,
+		`test_prometheus_gauge_foobar 42`,
 	}, "\n"), scrapePrometheus(t); !strings.Contains(have, want) {
 		t.Errorf("metric stanza not found or incorrect\n%s", have)
 	}
 	c.Add(-43)
 	if want, have := strings.Join([]string{
-		`# HELP test_gauge Dolor sit.`,
-		`# TYPE test_gauge gauge`,
-		`test_gauge -1`,
+		`# HELP test_prometheus_gauge_foobar Dolor sit.`,
+		`# TYPE test_prometheus_gauge_foobar gauge`,
+		`test_prometheus_gauge_foobar -1`,
 	}, "\n"), scrapePrometheus(t); !strings.Contains(have, want) {
 		t.Errorf("metric stanza not found or incorrect\n%s", have)
 	}
 }
 
 func TestPrometheusHistogram(t *testing.T) {
-	h := metrics.NewPrometheusHistogram("test_histogram", "Qwerty asdf.", []string{})
+	h := metrics.NewPrometheusHistogram("test", "prometheus_histogram", "foobar", "Qwerty asdf.", []string{})
 
 	const mean, stdev int64 = 50, 10
 	populateNormalHistogram(t, h, 34, mean, stdev)
-	assertPrometheusNormalHistogram(t, "test_histogram", mean, stdev)
+	assertPrometheusNormalHistogram(t, "test_prometheus_histogram_foobar", mean, stdev)
 }
 
 func assertPrometheusNormalHistogram(t *testing.T, metricName string, mean, stdev int64) {
