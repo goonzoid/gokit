@@ -35,7 +35,7 @@ func mapCounter(in chan uint64) chan string {
 	out := make(chan string)
 	go func() {
 		for delta := range in {
-			out <- fmt.Sprintf(":%d|c", delta)
+			out <- fmt.Sprintf("%d|c", delta)
 		}
 	}()
 	return out
@@ -70,15 +70,19 @@ func (g *statsdGauge) Set(value int64) { g.set <- value }
 func mapGauge(add, set chan int64) chan string {
 	out := make(chan string)
 	go func() {
-		var v int64
 		for {
 			select {
 			case delta := <-add:
-				v += delta
+				// https://github.com/etsy/statsd/blob/master/docs/metric_types.md#gauges
+				sign := "+"
+				if delta < 0 {
+					sign, delta = "-", -delta
+				}
+				out <- fmt.Sprintf("%s%d|g", sign, delta)
+
 			case value := <-set:
-				v = value
+				out <- fmt.Sprintf("%d|g", value)
 			}
-			out <- fmt.Sprintf(":%d|g", v)
 		}
 	}()
 	return out
@@ -117,22 +121,21 @@ func mapHistogram(in chan int64) chan string {
 	out := make(chan string)
 	go func() {
 		for observation := range in {
-			out <- fmt.Sprintf(":%d|ms", observation)
+			out <- fmt.Sprintf("%d|ms", observation)
 		}
 	}()
 	return out
 }
 
+var tick = time.Tick
+
 func fwd(w io.Writer, key string, interval time.Duration, c chan string) {
 	buf := &bytes.Buffer{}
-	tick := time.Tick(interval)
+	tick := tick(interval)
 	for {
 		select {
 		case s := <-c:
-			if buf.Len() == 0 {
-				buf.WriteString(key)
-			}
-			fmt.Fprintf(buf, s)
+			fmt.Fprintf(buf, "%s:%s\n", key, s)
 			if buf.Len() > maxBufferSize {
 				flush(w, buf)
 			}
